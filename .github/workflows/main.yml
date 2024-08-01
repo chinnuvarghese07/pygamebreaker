@@ -30,9 +30,9 @@ jobs:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
-        docker build -t chinnuworkspace/pygamebreaker:latest .
+        docker build -t $DOCKER_USERNAME/pygamebreaker:latest .
         echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-        docker push chinnuworkspace/pygamebreaker:latest
+        docker push $DOCKER_USERNAME/pygamebreaker:latest
 
   deploy:
     needs: build-and-push
