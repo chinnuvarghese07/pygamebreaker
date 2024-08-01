@@ -33,8 +33,7 @@ jobs:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
-        cd path/to/dockerfile/directory  # Add this line if Dockerfile is not in root
-        docker build -t $DOCKER_USERNAME/pygamebreaker:latest -f Dockerfile .
+        docker build -t $DOCKER_USERNAME/pygamebreaker:latest .
         echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         docker push $DOCKER_USERNAME/pygamebreaker:latest
 
