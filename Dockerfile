@@ -24,6 +24,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code into the container
 COPY . .
 
+# Set executable permissions for the game script
+RUN chmod +x breaker_game.py
+
 # Expose the port the app runs on
 EXPOSE 5000
 
@@ -31,5 +34,5 @@ EXPOSE 5000
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
-# Run the application
-CMD ["flask", "run"]
+# Run the application with Gunicorn
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
