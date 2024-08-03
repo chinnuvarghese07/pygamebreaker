@@ -4,8 +4,7 @@ import webbrowser  # Necessary for opening the registration link
 import requests
 import sys
 import os
-
-
+import logging
 
 # Initialize Pygame
 pygame.init()
@@ -72,6 +71,8 @@ def create_celebration_particles():
 
 celebration_particles = []
 
+# Set up logging
+logging.basicConfig(filename='game_errors.log', level=logging.DEBUG)
 
 # Game Loop
 clock = pygame.time.Clock()
@@ -181,6 +182,9 @@ while running:
                 if event.type == pygame.KEYDOWN:
                     waiting = False
                     running = False
+
+except Exception as e:
+    logging.exception("An error occurred while running the game: %s", e)
 
 # At the end of your game loop, after pygame.quit()
 import os

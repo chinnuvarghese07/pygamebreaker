@@ -107,7 +107,7 @@ def game():
         os.remove('game_result.txt')
         
     # Use python to run the game
-    subprocess.Popen(["python", "breaker_game.py", os.getcwd(), player_name])
+    subprocess.Popen(["xvfb-run", "python", "breaker_game.py", os.getcwd(), player_name])
     
     return jsonify({"message": "Game launched. Check your desktop for the game window."})
 

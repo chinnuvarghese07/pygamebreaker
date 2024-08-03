@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     libsdl2-ttf-dev \
     libfreetype6-dev \
     libportmidi-dev \
+    xvfb \
     && rm -rf /var/lib/apt/lists/*
 
 # Install the required packages
