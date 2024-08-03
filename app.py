@@ -106,9 +106,12 @@ def game():
     # Remove the result file after updating the score
         os.remove('game_result.txt')
         
-    # Use python to run the game
-    subprocess.Popen(["xvfb-run", "python", "breaker_game.py", os.getcwd(), player_name])
-    
+    # Use pythonw.exe to run the game without a console window on Windows
+    if os.name == 'nt':  # Windows
+        subprocess.Popen(["pythonw", "breaker_game.py", os.getcwd(), player_name])
+    else:  # Unix/Linux (including Ubuntu)
+        game_script = os.path.join(os.getcwd(), "breaker_game.py")
+        subprocess.Popen(["python3", game_script, player_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return jsonify({"message": "Game launched. Check your desktop for the game window."})
 
 @app.route('/check_game_status', methods=['GET'])
