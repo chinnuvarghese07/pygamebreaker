@@ -106,8 +106,8 @@ def game():
     # Remove the result file after updating the score
         os.remove('game_result.txt')
         
-    # Use pythonw.exe to run the game without a console window
-    subprocess.Popen(["pythonw", "breaker_game.py", os.getcwd(), player_name])
+    # Use python to run the game
+    subprocess.Popen(["python", "breaker_game.py", os.getcwd(), player_name])
     
     return jsonify({"message": "Game launched. Check your desktop for the game window."})
 

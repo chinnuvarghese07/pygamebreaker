@@ -50,9 +50,7 @@ pygame.display.set_caption("Bricks Breaker")
 ball = pygame.Rect(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, BALL_RADIUS * 2, BALL_RADIUS * 2)
 ball_speed = [BALL_SPEED_X, BALL_SPEED_Y]
 paddle = pygame.Rect(SCREEN_WIDTH // 2 - PADDLE_WIDTH // 2, SCREEN_HEIGHT - 30, PADDLE_WIDTH, PADDLE_HEIGHT)
-# Reduce the number of bricks for quicker testing
-bricks = [pygame.Rect(col * BRICK_WIDTH, row * BRICK_HEIGHT, BRICK_WIDTH, BRICK_HEIGHT) for row in range(1) for col in range(1)]
-
+bricks = [pygame.Rect(col * BRICK_WIDTH, row * BRICK_HEIGHT, BRICK_WIDTH, BRICK_HEIGHT) for row in range(5) for col in range(10)]
 score = 0
 font = pygame.font.Font(None, 36)
 
