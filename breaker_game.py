@@ -5,7 +5,8 @@ import requests
 import sys
 import os
 import logging
-
+os.environ['SDL_VIDEODRIVER'] = 'dummy'  # Use a dummy video driver
+os.environ['SDL_AUDIODRIVER'] = 'dummy'  # Use a dummy audio driver
 # Initialize Pygame
 pygame.init()
 
