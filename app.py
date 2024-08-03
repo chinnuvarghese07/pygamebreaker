@@ -4,8 +4,10 @@ import subprocess
 import os
 import threading
 import time
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # PostgreSQL connection parameters
 DB_NAME = "pygamebreaker"
