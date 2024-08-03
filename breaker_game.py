@@ -79,110 +79,109 @@ clock = pygame.time.Clock()
 running = True
 game_over = False
 win = False
+try:
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        screen.blit(copilot_background, (0, 0))
+        # for event in pygame.event.get():
+        #     if event.type == pygame.QUIT:
+        #         running = False
 
-    screen.blit(copilot_background, (0, 0))
-    # for event in pygame.event.get():
-    #     if event.type == pygame.QUIT:
-    #         running = False
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        paddle.x = mouse_x - PADDLE_WIDTH // 2
 
-    mouse_x, mouse_y = pygame.mouse.get_pos()
-    paddle.x = mouse_x - PADDLE_WIDTH // 2
+        if not game_over:
+            ball.x += ball_speed[0]
+            ball.y += ball_speed[1]
 
-    if not game_over:
-        ball.x += ball_speed[0]
-        ball.y += ball_speed[1]
+            # Ball collision with walls
+            if ball.left <= 0 or ball.right >= SCREEN_WIDTH:
+                ball_speed[0] = -ball_speed[0]
+            if ball.top <= 0:
+                ball_speed[1] = -ball_speed[1]
+            # Check if ball misses the paddle
+            if ball.bottom >= SCREEN_HEIGHT:
+                game_over = True
 
-        # Ball collision with walls
-        if ball.left <= 0 or ball.right >= SCREEN_WIDTH:
-            ball_speed[0] = -ball_speed[0]
-        if ball.top <= 0:
-            ball_speed[1] = -ball_speed[1]
-        # Check if ball misses the paddle
-        if ball.bottom >= SCREEN_HEIGHT:
-            game_over = True
+            # Ball collision with the paddle
+            if ball.colliderect(paddle):
+                ball_speed[1] = -ball_speed[1]
 
-        # Ball collision with the paddle
-        if ball.colliderect(paddle):
-            ball_speed[1] = -ball_speed[1]
+            # Ball collision with bricks
+            for brick in bricks[:]:
+                if ball.colliderect(brick):
+                    ball_speed[1] = -ball_speed[1]  # Bounce the ball back
+                    bricks.remove(brick)
+                    score += 10
 
-        # Ball collision with bricks
-        for brick in bricks[:]:
-            if ball.colliderect(brick):
-                ball_speed[1] = -ball_speed[1]  # Bounce the ball back
-                bricks.remove(brick)
-                score += 10
+            # Check if all bricks are destroyed
+            if not bricks:
+                win = True
+                game_over = True
+                celebration_particles = create_celebration_particles()
 
-         # Check if all bricks are destroyed
-        if not bricks:
-            win = True
-            game_over = True
-            celebration_particles = create_celebration_particles()
+        # Drawing game objects
+        pygame.draw.rect(screen, BLACK, paddle)
+        pygame.draw.ellipse(screen, BLUE, ball)
 
-    # Drawing game objects
-    pygame.draw.rect(screen, BLACK, paddle)
-    pygame.draw.ellipse(screen, BLUE, ball)
+        for index, brick in enumerate(bricks):
+            if index % 2 == 0:
+                screen.blit(microsoft_logo, brick)
+            else:
+                screen.blit(cns_logo, brick)
 
-    for index, brick in enumerate(bricks):
-        if index % 2 == 0:
-            screen.blit(microsoft_logo, brick)
-        else:
-            screen.blit(cns_logo, brick)
+        # Displaying the score
+        score_text = font.render(f"Score: {score}", True, WHITE)
+        screen.blit(score_text, (20, 20))
 
-    # Displaying the score
-    score_text = font.render(f"Score: {score}", True, WHITE)
-    screen.blit(score_text, (20, 20))
+        # Handling game over state
+        if game_over:
+            if win:
+                win_text = f"Congratulations, {player_name}! You Won with a score of {score}!"
+                win_message = font.render(win_text, True, BLUE_BLACK)
+                win_rect = win_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
+                screen.blit(win_message, win_rect)
+                
+                register_text = "Register for a free license."
+                register_message = font.render(register_text, True, BLUE_BLACK)
+                register_rect = register_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50))
+                screen.blit(register_message, register_rect)
+                
+                # Update and draw celebration particles
+                for particle in celebration_particles:
+                    pygame.draw.circle(screen, particle[5], (int(particle[0]), int(particle[1])), particle[4])
+                    particle[0] += particle[2]
+                    particle[1] += particle[3]
+                    if particle[0] < 0 or particle[0] > SCREEN_WIDTH or particle[1] < 0 or particle[1] > SCREEN_HEIGHT:
+                        particle[0] = random.randint(0, SCREEN_WIDTH)
+                        particle[1] = random.randint(0, SCREEN_HEIGHT)
+                
+                print("Register here:", REGISTRATION_LINK)
+            else:
+                game_over_text = font.render("Game Over", True, BLUE_BLACK)
+                text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
+                screen.blit(game_over_text, text_rect)
 
-    # Handling game over state
-    if game_over:
-        if win:
-            win_text = f"Congratulations, {player_name}! You Won with a score of {score}!"
-            win_message = font.render(win_text, True, BLUE_BLACK)
-            win_rect = win_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
-            screen.blit(win_message, win_rect)
-            
-            register_text = "Register for a free license."
-            register_message = font.render(register_text, True, BLUE_BLACK)
-            register_rect = register_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50))
-            screen.blit(register_message, register_rect)
-            
-            # Update and draw celebration particles
-            for particle in celebration_particles:
-                pygame.draw.circle(screen, particle[5], (int(particle[0]), int(particle[1])), particle[4])
-                particle[0] += particle[2]
-                particle[1] += particle[3]
-                if particle[0] < 0 or particle[0] > SCREEN_WIDTH or particle[1] < 0 or particle[1] > SCREEN_HEIGHT:
-                    particle[0] = random.randint(0, SCREEN_WIDTH)
-                    particle[1] = random.randint(0, SCREEN_HEIGHT)
-            
-            print("Register here:", REGISTRATION_LINK)
-        else:
-            game_over_text = font.render("Game Over", True, BLUE_BLACK)
-            text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
-            screen.blit(game_over_text, text_rect)
+            exit_text = font.render("Press any key to exit", True, WHITE)
+            exit_rect = exit_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 50))
+            screen.blit(exit_text, exit_rect)
 
-        exit_text = font.render("Press any key to exit", True, WHITE)
-        exit_rect = exit_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 50))
-        screen.blit(exit_text, exit_rect)
+        pygame.display.flip()
+        clock.tick(60)
 
-    pygame.display.flip()
-    clock.tick(60)
-
-    if game_over:
-        waiting = True
-        while waiting:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    waiting = False
-                    running = False
-                if event.type == pygame.KEYDOWN:
-                    waiting = False
-                    running = False
-
+        if game_over:
+            waiting = True
+            while waiting:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        waiting = False
+                        running = False
+                    if event.type == pygame.KEYDOWN:
+                        waiting = False
+                        running = False
 except Exception as e:
     logging.exception("An error occurred while running the game: %s", e)
 
