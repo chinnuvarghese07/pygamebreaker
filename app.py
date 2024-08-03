@@ -122,5 +122,7 @@ def check_game_status():
         return jsonify({"status": "completed", "result": result}), 200
     return jsonify({"status": "in_progress"}), 200
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
