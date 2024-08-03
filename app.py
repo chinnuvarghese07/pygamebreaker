@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-from flask_pymongo import PyMongo
+import psycopg2
 import subprocess
 import os
 import threading
@@ -7,9 +7,41 @@ import time
 
 app = Flask(__name__)
 
-# Connect to MongoDB
-app.config["MONGO_URI"] = "mongodb://localhost:27017/user-registration"
-mongo = PyMongo(app)
+# PostgreSQL connection parameters
+DB_NAME = "pygamebreaker"
+DB_USER = "postgres"
+DB_PASSWORD = "pygamebreaker"
+DB_HOST = "database-1.c3imkoqug979.us-east-1.rds.amazonaws.com"
+DB_PORT = "5432"
+
+def get_db_connection():
+    return psycopg2.connect(
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+
+# Create the users table if it doesn't exist
+def create_users_table():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            email VARCHAR(100) UNIQUE NOT NULL,
+            password VARCHAR(100) NOT NULL,
+            score INTEGER DEFAULT 0
+        )
+    ''')
+    conn.commit()
+    cur.close()
+    conn.close()
+
+# Call this function when the app starts
+create_users_table()
 
 @app.route('/')
 def index():
@@ -24,51 +56,68 @@ def register():
         "password": data['password']  # Note: In a real application, you should hash this password
     }
     try:
-        mongo.db.users.insert_one(new_user)
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if the email already exists
+        cur.execute("SELECT * FROM users WHERE email = %s", (new_user['email'],))
+        if cur.fetchone():
+            return jsonify({"error": "Email already registered."}), 400
+        
+        cur.execute(
+            "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)",
+            (new_user['name'], new_user['email'], new_user['password'])
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
         return jsonify({"message": "User registered successfully", "redirect": "/game"}), 201
     except Exception as e:
-        return jsonify({"error": "There was an error registering the user"}), 500
-
-# @app.route('/game')
-# def game():
-#     # Run the breaker_game.py script with the current directory as an argument
-#     subprocess.Popen(["python", "breaker_game.py", os.getcwd()])
-#     return "Game launched. Check your desktop for the game window."\
-# @app.route('/game')
-# def game():
-#     latest_user = mongo.db.users.find_one(sort=[('_id', -1)])
-#     player_name = latest_user['name'] if latest_user else "Player"
-    
-#     # Use pythonw.exe to run the game without a console window
-#     game_process = subprocess.Popen(["pythonw", "breaker_game.py", os.getcwd(), player_name])
-    
-#     # Start a thread to wait for the game to finish
-#     threading.Thread(target=wait_for_game, args=(game_process,)).start()
-    
-#     return "Game launched. Check your desktop for the game window."
+        return jsonify({"error": f"There was an error registering the user: {str(e)}"}), 500
 
 @app.route('/game')
 def game():
-    latest_user = mongo.db.users.find_one(sort=[('_id', -1)])
-    player_name = latest_user['name'] if latest_user else "Player"
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, name FROM users ORDER BY id DESC LIMIT 1")
+    latest_user = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    player_id = latest_user[0] if latest_user else None
+    player_name = latest_user[1] if latest_user else "Player"
     
     # Remove the result file if it exists
     if os.path.exists('game_result.txt'):
+        with open('game_result.txt', 'r') as f:
+            result = f.read().strip()
+        
+        # Assuming the result is either 'win' or 'lose'
+        score = 1 if result == 'win' else 0
+        
+        # Update the score in the database
+        if player_id is not None:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("UPDATE users SET score = score + %s WHERE id = %s", (score, player_id))
+            conn.commit()
+            cur.close()
+            conn.close()
+    # Remove the result file after updating the score
         os.remove('game_result.txt')
-    
+        
     # Use pythonw.exe to run the game without a console window
     subprocess.Popen(["pythonw", "breaker_game.py", os.getcwd(), player_name])
     
     return jsonify({"message": "Game launched. Check your desktop for the game window."})
 
-@app.route('/check_game_status')
+@app.route('/check_game_status', methods=['GET'])
 def check_game_status():
     if os.path.exists('game_result.txt'):
         with open('game_result.txt', 'r') as f:
             result = f.read().strip()
-        os.remove('game_result.txt')
-        return jsonify({"status": "completed", "result": result})
-    return jsonify({"status": "running"})
+        return jsonify({"status": "completed", "result": result}), 200
+    return jsonify({"status": "in_progress"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

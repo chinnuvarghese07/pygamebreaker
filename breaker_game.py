@@ -1,6 +1,7 @@
 import pygame
 import random
 import webbrowser  # Necessary for opening the registration link
+import requests
 import sys
 import os
 

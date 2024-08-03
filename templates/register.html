@@ -62,7 +62,7 @@
             border: 1px solid #c3e6cb;
         }
         .modal {
-            display: none;
+            display: none; /* Hidden by default */
             position: fixed;
             z-index: 1;
             left: 0;
@@ -70,8 +70,10 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgba(0, 0, 0, 0.7); /* Darker background */
+            animation: fadeIn 0.5s; /* Fade-in effect */
         }
+
         .modal-content {
             background-color: #fefefe;
             margin: 15% auto;
@@ -81,6 +83,18 @@
             max-width: 500px;
             border-radius: 10px;
             text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
+            animation: slideIn 0.5s; /* Slide-in effect */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         .close {
             color: #aaa;
@@ -94,9 +108,40 @@
             text-decoration: none;
             cursor: pointer;
         }
+        /* Success message styles */
+        .success-message {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        /* Error message styles */
+        .error-message {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        /* Loading bar styles */
+        #loading-bar {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: #4CAF50; /* Green color */
+            z-index: 1000; /* On top of other elements */
+        }
     </style>
 </head>
 <body>
+    <div id="loading-bar"></div> <!-- Loading bar element -->
     <div class="container">
         <div id="message"></div>
         <form id="registration-form">
@@ -104,7 +149,7 @@
             <input type="text" id="name" name="name" placeholder="Name" required>
             <input type="email" id="email" name="email" placeholder="Email" required>
             <input type="password" id="password" name="password" placeholder="Password" required>
-            <button type="submit">Register</button>
+            <button type="submit" id="register-button">Register</button>
         </form>
     </div>
 
@@ -120,6 +165,8 @@
         const modal = document.getElementById("modal");
         const modalMessage = document.getElementById("modal-message");
         const closeBtn = document.getElementsByClassName("close")[0];
+        const loadingBar = document.getElementById("loading-bar");
+        const registerButton = document.getElementById("register-button");
 
         function showMessage(message) {
             messageElement.textContent = message;
@@ -130,8 +177,9 @@
             }, 3000);
         }
 
-        function showModal(message) {
+        function showModal(message, isSuccess = true) {
             modalMessage.textContent = message;
+            modalMessage.className = isSuccess ? 'success-message' : 'error-message'; // Set class based on success or error
             modal.style.display = "block";
         }
 
@@ -150,6 +198,12 @@
             var name = document.getElementById('name').value;
             var email = document.getElementById('email').value;
             var password = document.getElementById('password').value;
+
+            // Show loading bar
+            loadingBar.style.display = "block";
+            registerButton.disabled = true; // Disable the button
+            registerButton.textContent = "Registering..."; // Change button text
+
             fetch('/register', {
                 method: 'POST',
                 headers: {
@@ -157,7 +211,17 @@
                 },
                 body: JSON.stringify({name: name, email: email, password: password}),
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        showModal(err.error); // Show the error message directly
+                        loadingBar.style.display = "none"; // Hide loading bar on error
+                        registerButton.disabled = false; // Re-enable the button
+                        registerButton.textContent = "Register"; // Reset button text
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 showMessage("User registered successfully!");
                 setTimeout(() => {
@@ -169,6 +233,9 @@
             .catch((error) => {
                 console.error('Error:', error);
                 showModal("An error occurred during registration.");
+                loadingBar.style.display = "none"; // Hide loading bar on error
+                registerButton.disabled = false; // Re-enable the button
+                registerButton.textContent = "Register"; // Reset button text
             });
         });
 
@@ -177,11 +244,17 @@
                 .then(response => response.json())
                 .then(data => {
                     showModal(data.message);
+                    loadingBar.style.display = "none"; // Hide loading bar when game launches
+                    registerButton.disabled = false; // Re-enable the button
+                    registerButton.textContent = "Register"; // Reset button text
                     checkGameStatus();
                 })
                 .catch((error) => {
                     console.error('Error:', error);
                     showModal("An error occurred while launching the game.");
+                    loadingBar.style.display = "none"; // Hide loading bar on error
+                    registerButton.disabled = false; // Re-enable the button
+                    registerButton.textContent = "Register"; // Reset button text
                 });
         }
 
@@ -190,7 +263,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'completed') {
-                        showModal(data.result === 'win' ? 'Congratulations! You won!' : 'Game over. Try again!');
+                        showModal(data.result === 'win' ? 'Congratulations! You won!' : 'Game over. Try again!', data.result === 'win');
                         setTimeout(() => {
                             window.location.href = '/';
                         }, 3000); // Redirect after 3 seconds
