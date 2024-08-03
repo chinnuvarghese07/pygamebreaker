@@ -24,6 +24,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code into the container
 COPY . .
 
+# Set environment variables for audio
+ENV SDL_VIDEODRIVER=dummy
+ENV SDL_AUDIODRIVER=dummy
+
 # Set executable permissions for the game script
 RUN chmod +x breaker_game.py
 
