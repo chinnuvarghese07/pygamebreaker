@@ -1,11 +1,11 @@
 # Use an official Python runtime as the base image
 FROM python:3.9  
+
 # Set the working directory in the container
 WORKDIR /app
 
 # Set the display environment variable
 ENV DISPLAY=:99  
-# Ensure this matches your Kubernetes deployment
 
 # Copy the requirements file into the container
 COPY requirements.txt .
@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libportmidi-dev \
     xvfb \
-    procps \ 
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Install the required packages
@@ -30,7 +30,6 @@ COPY . .
 
 # Create the game_result.txt file and set permissions
 RUN touch game_result.txt && chmod 666 game_result.txt
-
 
 # Set environment variables for audio
 ENV SDL_VIDEODRIVER=dummy
@@ -51,7 +50,4 @@ RUN useradd -m appuser
 USER appuser
 
 # Run the application with Gunicorn
-USER root
-# CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
-# Run the application with Gunicorn and set a longer timeout
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "--timeout", "120", "app:app"]
