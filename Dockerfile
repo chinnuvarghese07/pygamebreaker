@@ -28,6 +28,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code into the container
 COPY . .
 
+# Create the game_result.txt file and set permissions
+RUN touch game_result.txt && chmod 666 game_result.txt
+
+
 # Set environment variables for audio
 ENV SDL_VIDEODRIVER=dummy
 ENV SDL_AUDIODRIVER=dummy
@@ -47,4 +51,5 @@ RUN useradd -m appuser
 USER appuser
 
 # Run the application with Gunicorn
+USER root
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]

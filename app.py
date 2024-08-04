@@ -5,6 +5,7 @@ import os
 import threading
 import time
 from flask_cors import CORS
+import logging
 
 app = Flask(__name__)
 CORS(app)
@@ -90,23 +91,25 @@ def game():
     player_name = latest_user[1] if latest_user else "Player"
     
     # Remove the result file if it exists
-    if os.path.exists('game_result.txt'):
-        with open('game_result.txt', 'r') as f:
-            result = f.read().strip()
-        
-        # Assuming the result is either 'win' or 'lose'
-        score = 1 if result == 'win' else 0
-        
-        # Update the score in the database
-        if player_id is not None:
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("UPDATE users SET score = score + %s WHERE id = %s", (score, player_id))
-            conn.commit()
-            cur.close()
-            conn.close()
-    # Remove the result file after updating the score
-        os.remove('game_result.txt')
+    try:
+        if os.path.exists('game_result.txt'):
+            with open('game_result.txt', 'r') as f:
+                result = f.read().strip()
+            
+            # Assuming the result is either 'win' or 'lose'
+            score = 1 if result == 'win' else 0
+            
+            # Update the score in the database
+            if player_id is not None:
+                conn = get_db_connection()
+                cur = conn.cursor()
+                cur.execute("UPDATE users SET score = score + %s WHERE id = %s", (score, player_id))
+                conn.commit()
+                cur.close()
+                conn.close()
+            os.remove('game_result.txt')
+    except PermissionError:
+        logging.error("Permission denied: Unable to delete 'game_result.txt'")
         
     # Use pythonw.exe to run the game without a console window on Windows
     if os.name == 'nt':  # Windows
