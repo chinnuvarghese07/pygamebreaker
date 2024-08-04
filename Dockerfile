@@ -1,5 +1,5 @@
 # Use an official Python runtime as the base image
-FROM python:3.9-slim
+FROM python:3.9  # Change from python:3.9-slim to python:3.9
 
 # Set the working directory in the container
 WORKDIR /app
@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libportmidi-dev \
     xvfb \
+    procps \ 
     && rm -rf /var/lib/apt/lists/*
 
 # Install the required packages

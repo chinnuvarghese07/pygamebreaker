@@ -113,24 +113,29 @@ def game():
         logging.error("Permission denied: Unable to delete 'game_result.txt'")
     logging.info("After removing game_result.txt")
         
-    # Use pythonw.exe to run the game without a console window on Windows
-    if os.name == 'nt':  # Windows
-        subprocess.Popen(["pythonw", "breaker_game.py", os.getcwd(), player_name])
-    else:  # Unix/Linux
-        game_script = os.path.join(os.getcwd(), "breaker_game.py")
-        try:
-            process = subprocess.Popen(
-                ["xvfb-run", "-a", "python3", game_script, os.getcwd(), player_name],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            stdout, stderr = process.communicate()
-            if stderr:
-                print(f"Error launching game: {stderr.decode()}")
-            else:
-                print(f"Game launched successfully: {stdout.decode()}")
-        except Exception as e:
-            print(f"Failed to launch game: {str(e)}")
+    # Launch the game in a separate thread
+    def launch_game():
+        if os.name == 'nt':  # Windows
+            subprocess.Popen(["pythonw", "breaker_game.py", os.getcwd(), player_name])
+        else:  # Unix/Linux
+            game_script = os.path.join(os.getcwd(), "breaker_game.py")
+            try:
+                process = subprocess.Popen(
+                    ["xvfb-run", "-a", "python3", game_script, os.getcwd(), player_name],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                stdout, stderr = process.communicate()
+                if stderr:
+                    logging.error(f"Error launching game: {stderr.decode()}")
+                else:
+                    logging.info(f"Game launched successfully: {stdout.decode()}")
+            except Exception as e:
+                logging.error(f"Failed to launch game: {str(e)}")
+
+    logging.info("Attempting to launch the game")
+    threading.Thread(target=launch_game).start()
+    logging.info("Game launch thread started")
 
     return jsonify({"message": "Game launched. Check your desktop for the game window."})
 
