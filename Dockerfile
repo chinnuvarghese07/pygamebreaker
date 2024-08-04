@@ -5,7 +5,8 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Set the display environment variable
-ENV DISPLAY=:99
+ENV DISPLAY=:99  
+# Ensure this matches your Kubernetes deployment
 
 # Copy the requirements file into the container
 COPY requirements.txt .
@@ -40,6 +41,10 @@ EXPOSE 5000
 # Set environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
+
+# Create a non-root user and switch to it (optional but recommended)
+RUN useradd -m appuser
+USER appuser
 
 # Run the application with Gunicorn
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]

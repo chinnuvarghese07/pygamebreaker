@@ -1,13 +1,13 @@
-import pygame
 import random
 import webbrowser  # Necessary for opening the registration link
 import requests
 import sys
 import os
+os.environ['DISPLAY'] = ':1'
 import logging
 
 import subprocess
-os.environ['DISPLAY'] = ':99'
+import pygame
 # os.environ['SDL_VIDEODRIVER'] = 'dummy'  # Use a dummy video driver
 # os.environ['SDL_AUDIODRIVER'] = 'dummy'  # Use a dummy audio driver
 # Initialize Pygame
@@ -36,7 +36,10 @@ current_dir = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
 player_name = sys.argv[2] if len(sys.argv) > 2 else "Player"
 
 # Load images using relative paths
-copilot_background = pygame.image.load(os.path.join(current_dir, "images", "Copilot.jpg"))
+try:
+    copilot_background = pygame.image.load(os.path.join(current_dir, "images", "Copilot.jpg"))
+except Exception as e:
+    logging.error(f"Error loading background image: {str(e)}")
 microsoft_logo = pygame.image.load(os.path.join(current_dir, "images", "microsoft_logo.png"))
 cns_logo = pygame.image.load(os.path.join(current_dir, "images", "CNS.png"))
 
