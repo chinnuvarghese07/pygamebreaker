@@ -53,4 +53,4 @@ ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
 # Run the application with Gunicorn
-CMD ["xvfb-run","gunicorn", "-b", "0.0.0.0:5000", "--timeout", "120", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "--timeout", "120", "app:app"]
