@@ -80,6 +80,7 @@ def register():
 
 @app.route('/game')
 def game():
+    logging.info("Game endpoint hit")
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("SELECT id, name FROM users ORDER BY id DESC LIMIT 1")
@@ -90,7 +91,7 @@ def game():
     player_id = latest_user[0] if latest_user else None
     player_name = latest_user[1] if latest_user else "Player"
     
-    # Remove the result file if it exists
+    logging.info("Before removing game_result.txt")
     try:
         if os.path.exists('game_result.txt'):
             with open('game_result.txt', 'r') as f:
@@ -110,6 +111,7 @@ def game():
             os.remove('game_result.txt')
     except PermissionError:
         logging.error("Permission denied: Unable to delete 'game_result.txt'")
+    logging.info("After removing game_result.txt")
         
     # Use pythonw.exe to run the game without a console window on Windows
     if os.name == 'nt':  # Windows

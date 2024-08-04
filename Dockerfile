@@ -52,4 +52,6 @@ USER appuser
 
 # Run the application with Gunicorn
 USER root
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+# CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+# Run the application with Gunicorn and set a longer timeout
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "--timeout", "120", "app:app"]
