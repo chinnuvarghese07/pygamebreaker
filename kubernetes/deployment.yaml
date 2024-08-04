@@ -31,3 +31,4 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "1"
+        command: ["xvfb-run", "gunicorn", "-b", "0.0.0.0:5000", "--timeout", "120", "app:app"]
