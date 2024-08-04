@@ -111,13 +111,21 @@ def game():
     # Use pythonw.exe to run the game without a console window on Windows
     if os.name == 'nt':  # Windows
         subprocess.Popen(["pythonw", "breaker_game.py", os.getcwd(), player_name])
-    else:  # Unix/Linux
-        game_script = os.path.join(os.getcwd(), "breaker_game.py")
-        process = subprocess.Popen(["python3", game_script, player_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        if stderr:
-            print(f"Error launching game: {stderr.decode()}")
+    # else:  # Unix/Linux
+    #     game_script = os.path.join(os.getcwd(), "breaker_game.py")
+    #     process = subprocess.Popen(["python3", game_script, player_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    #     stdout, stderr = process.communicate()
+    #     if stderr:
+    #         print(f"Error launching game: {stderr.decode()}")
+    #     else:
+    #         print(f"Game launched successfully: {stdout.decode()}")
     
+    else:  # Unix/Linux
+      game_script = os.path.join(os.getcwd(), "breaker_game.py")
+      # Start Xvfb and then run the game script
+      subprocess.Popen(["xvfb-run", "python3", game_script, player_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      
+
     return jsonify({"message": "Game launched. Check your desktop for the game window."})
 
 @app.route('/check_game_status', methods=['GET'])

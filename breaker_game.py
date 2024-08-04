@@ -7,7 +7,7 @@ import os
 import logging
 
 import subprocess
-
+os.environ['DISPLAY'] = ':99'
 # os.environ['SDL_VIDEODRIVER'] = 'dummy'  # Use a dummy video driver
 # os.environ['SDL_AUDIODRIVER'] = 'dummy'  # Use a dummy audio driver
 # Initialize Pygame
