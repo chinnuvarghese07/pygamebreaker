@@ -4,7 +4,13 @@ FROM python:3.9
 # Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies for pygame and Xvfb
+# Set the display environment variable
+ENV DISPLAY=:99  
+
+# Copy the requirements file into the container
+COPY requirements.txt .
+
+# Install system dependencies for pygame
 RUN apt-get update && apt-get install -y \
     libsdl2-dev \
     libsdl2-image-dev \
@@ -16,22 +22,35 @@ RUN apt-get update && apt-get install -y \
     procps \
     && rm -rf /var/lib/apt/lists/*
 
-# Install the required Python packages
-COPY requirements.txt .
+RUN apt-get update && apt-get install -y xvfb gunicorn
+
+# Install the required packages
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code into the container
 COPY . .
 
-# Set environment variables for SDL (video and audio)
-ENV SDL_VIDEODRIVER=dummy
-ENV SDL_AUDIODRIVER=dummy
+# Create a non-root user and switch to it
+RUN useradd -m appuser
+
+# Set ownership and permissions for the app directory
+RUN chown -R appuser:appuser /app
+
+# Switch to the non-root user
+USER appuser
+
+# Create the game_result.txt file
+RUN touch /app/game_result.txt
 
 # Set executable permissions for the game script
-RUN chmod +x breaker_game.py
+RUN chmod +x /app/breaker_game.py
 
 # Expose the port the app runs on
 EXPOSE 5000
 
-# Run Xvfb and the application
-CMD ["xvfb-run", "gunicorn", "-b", "0.0.0.0:5000", "--timeout", "120", "app:app"]
+# Set environment variables
+ENV FLASK_APP=app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+
+# Run the application with Gunicorn
+CMD ["xvfb-run","gunicorn", "-b", "0.0.0.0:5000", "--timeout", "120", "app:app"]
