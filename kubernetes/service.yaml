@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: pygamebreaker
 spec:
+  type: LoadBalancer
+  ports:
+    - port: 5000
+      targetPort: 5000
+      protocol: TCP
   selector:
     app: pygamebreaker
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 5000
-  type: LoadBalancer

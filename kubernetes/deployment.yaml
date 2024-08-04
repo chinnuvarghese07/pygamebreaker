@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: pygamebreaker
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: pygamebreaker
@@ -19,5 +19,15 @@ spec:
         - containerPort: 5000
         env:
         - name: DISPLAY
-          value: ":99"  # Change this to match the Dockerfile
-        command: ["xvfb-run", "python3", "breaker_game.py", "$(pwd)", "PlayerName"]
+          value: ":99"
+        - name: FLASK_APP
+          value: "app.py"
+        - name: FLASK_RUN_HOST
+          value: "0.0.0.0"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "1"
