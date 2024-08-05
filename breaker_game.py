@@ -56,7 +56,8 @@ pygame.display.set_caption("Bricks Breaker")
 ball = pygame.Rect(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, BALL_RADIUS * 2, BALL_RADIUS * 2)
 ball_speed = [BALL_SPEED_X, BALL_SPEED_Y]
 paddle = pygame.Rect(SCREEN_WIDTH // 2 - PADDLE_WIDTH // 2, SCREEN_HEIGHT - 30, PADDLE_WIDTH, PADDLE_HEIGHT)
-bricks = [pygame.Rect(col * BRICK_WIDTH, row * BRICK_HEIGHT, BRICK_WIDTH, BRICK_HEIGHT) for row in range(5) for col in range(10)]
+# bricks = [pygame.Rect(col * BRICK_WIDTH, row * BRICK_HEIGHT, BRICK_WIDTH, BRICK_HEIGHT) for row in range(5) for col in range(10)]
+bricks = [pygame.Rect(col * BRICK_WIDTH, row * BRICK_HEIGHT, BRICK_WIDTH, BRICK_HEIGHT) for row in range(1) for col in range(1)]  # Reduced from 10 to 9
 score = 0
 font = pygame.font.Font(None, 36)
 
@@ -149,14 +150,17 @@ try:
             if win:
                 win_text = f"Congratulations, {player_name}! You Won with a score of {score}!"
                 win_message = font.render(win_text, True, BLUE_BLACK)
-                win_rect = win_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
+                win_rect = win_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4))  # Adjusted position
                 screen.blit(win_message, win_rect)
-                
+
+                score_text = font.render(f"Score: {score}", True, BLUE_BLACK)  # Display score
+                score_rect = score_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4 + 30))  # Below win message
+                screen.blit(score_text, score_rect)
+
                 register_text = "Register for a free license."
                 register_message = font.render(register_text, True, BLUE_BLACK)
-                register_rect = register_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50))
+                register_rect = register_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4 + 70))  # Below score
                 screen.blit(register_message, register_rect)
-                
                 # Update and draw celebration particles
                 for particle in celebration_particles:
                     pygame.draw.circle(screen, particle[5], (int(particle[0]), int(particle[1])), particle[4])
@@ -165,8 +169,13 @@ try:
                     if particle[0] < 0 or particle[0] > SCREEN_WIDTH or particle[1] < 0 or particle[1] > SCREEN_HEIGHT:
                         particle[0] = random.randint(0, SCREEN_WIDTH)
                         particle[1] = random.randint(0, SCREEN_HEIGHT)
-                
+                # Display the registration link
+                # link_text = f"Register here: {REGISTRATION_LINK}"
+                # link_message = font.render(link_text, True, BLUE_BLACK)
+                # link_rect = link_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4 + 110))  # Below registration message
+                # screen.blit(link_message, link_rect)
                 print("Register here:", REGISTRATION_LINK)
+                
             else:
                 game_over_text = font.render("Game Over", True, BLUE_BLACK)
                 text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))

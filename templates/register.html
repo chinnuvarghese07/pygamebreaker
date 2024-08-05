@@ -263,7 +263,10 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'completed') {
-                        showModal(data.result === 'win' ? 'Congratulations! You won!' : 'Game over. Try again!', data.result === 'win');
+                        const resultMessage = data.result === 'win' 
+                            ? 'Congratulations! You won! Register here: <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=Se8oF0VYv0ij-tILIIJR2WHObAW-S8lKjVDM86zOFEpUNUtBQk81Tko4SDlIRTgwVExNWkxSSTU5Sy4u" target="_blank">Register for a free license</a>' 
+                            : 'Game over. Try again!';
+                        showModal(resultMessage, data.result === 'win');
                         setTimeout(() => {
                             window.location.href = '/';
                         }, 3000); // Redirect after 3 seconds
